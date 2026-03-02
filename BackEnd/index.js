@@ -28,7 +28,7 @@ import Notificacao from "./models/Notificacao.js";
 import Conquista from "./models/Conquista.js";
 import ConquistaUsuario from "./models/ConquistaUsuario.js";
 import iaEvaluators from './services/iaEvaluators.js';
-import adminRoutes from './routes/adminRoutes.js';
+import adminPanelRoutes from './routes/adminPanelRoutes.js';
 
 dotenv.config();
 
@@ -144,8 +144,8 @@ app.get("/", (req, res) => {
   });
 });
 
-// Registrar rotas administrativas (CRUD genérico + auth)
-app.use('/api/admin', adminRoutes);
+// Registrar rotas administrativas do painel (CRUD genérico + rotas específicas)
+app.use('/api/admin', adminPanelRoutes);
 
 app.get("/health", async (req, res) => {
   try {

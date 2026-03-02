@@ -319,6 +319,22 @@ export default function Layout({ children }) {
                         >
                           Configurações
                         </Link>
+                        {
+                          user && (
+                            user.isAdmin === true || user.isAdmin === 1 || user.isAdmin === '1' ||
+                            user.is_admin === 1 || String(user.isAdmin).toLowerCase() === 'true' ||
+                            (user.role && String(user.role).toLowerCase() === 'admin') ||
+                            user.funcao_id === 3 || (user.funcao && String(user.funcao.nome).toLowerCase().includes('admin'))
+                          ) && (
+                            <Link
+                              to="/administrador"
+                              onClick={() => setProfileOpen(false)}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-100"
+                            >
+                             Painel do Administrador
+                            </Link>
+                          )
+                        }
                         <div className="mx-3 my-1 h-px bg-gray-200" />
                         <button
                           onClick={handleLogout}

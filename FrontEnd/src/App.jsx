@@ -8,8 +8,7 @@ import Recuperar from "./Paginas/Primarias/Recuperar";
 import { AuthProvider } from './context/AuthContext';
 
 import Layout from "./Paginas/Secundarias/Layout";
-import AdminLayout from './Administrador/Layout';
-import AdminGeneric from './Administrador/GenericModule';
+import AdminDashboard from './Administrador/AdminDashboard';
 import ProtectedAdminRoute from './context/ProtectedAdminRoute';
 // module wrappers will be lazy-loaded via routes below
 import Home from "./Paginas/Secundarias/Home";
@@ -41,10 +40,7 @@ export default function App() {
           <Route path="/entrar-no-torneio" element={<EntrarTorneio />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/painel" element={<Dashboard />} />
-          <Route path="/administrador" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
-            <Route index element={<div className="p-6">Selecione um módulo no menu.</div>} />
-            <Route path=":module" element={<AdminGeneric />} />
-          </Route>
+          <Route path="/administrador" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
           <Route path="/portal-de-noticias" element={<Noticias />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/sobre-nos" element={<Sobre />} />
