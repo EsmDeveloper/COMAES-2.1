@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import adminService from './adminService';
 import TableModal from './TableModal';
-
 import { useAuth } from '../context/AuthContext';
 
 const TableManager = ({ table }) => {
     const { token } = useAuth();
-    const services = adminService(token);
-    const tableService = services.getService(table);
+    const services = useMemo(() => adminService(token), [token]);
+    const tableService = useMemo(() => services.getService(table), [services, table]);
 
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -16,7 +15,6 @@ const TableManager = ({ table }) => {
     const [modalMode, setModalMode] = useState('create');
     const [selectedItem, setSelectedItem] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [expandedTorneo, setExpandedTorneo] = useState(null);
     const [tableInfo, setTableInfo] = useState(null);
 
     // Static table definitions - keys must match backend model names exactly
@@ -244,8 +242,8 @@ const TableManager = ({ table }) => {
         };
     };
 
-    // Fetch data
-    const fetchData = async () => {
+    // Fetch data (stable function so other handlers can call it)
+    const fetchData = useCallback(async () => {
         if (!tableService) {
             setLoading(false);
             return;
@@ -271,11 +269,15 @@ const TableManager = ({ table }) => {
             console.error('Fetch error:', err);
             setLoading(false);
         }
-    };
+    }, [tableService, table]);
 
     useEffect(() => {
+        // reset modal state when switching tables to avoid stale state and re-renders
+        setShowModal(false);
+        setSelectedItem(null);
+        setModalMode('create');
         fetchData();
-    }, [tableService, table]);
+    }, [table, fetchData]);
 
     const handleAdd = () => {
         setModalMode('create');
@@ -368,53 +370,57 @@ const TableManager = ({ table }) => {
 
             {/* Table */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
-                <table className="w-full">
-                    <thead className="bg-gray-100 border-b">
-                        <tr>
-                            {info.displayColumns.map((col, idx) => (
-                                <th key={idx} className="px-6 py-4 text-left font-semibold text-gray-700">
-                                    {col}
-                                </th>
-                            ))}
-                            <th className="px-6 py-4 text-right font-semibold text-gray-700">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredData.length === 0 ? (
+                <div className="overflow-x-auto">
+                    <table className="min-w-max w-full">
+                        <thead className="bg-gray-100 border-b">
                             <tr>
-                                <td colSpan={info.displayColumns.length + 1} className="px-6 py-8 text-center text-gray-500">
-                                    Nenhum registro encontrado
-                                </td>
+                                {info.displayColumns.map((col, idx) => (
+                                    <th key={idx} className="px-6 py-4 text-left font-semibold text-gray-700 whitespace-nowrap">
+                                        {col}
+                                    </th>
+                                ))}
+                                <th className="px-6 py-4 text-right font-semibold text-gray-700 whitespace-nowrap">
+                                    Ações
+                                </th>
                             </tr>
-                        ) : (
-                            filteredData.map(item => (
-                                <React.Fragment key={item.id || JSON.stringify(item)}>
-                                    <tr className="border-b hover:bg-gray-50 transition">
+                        </thead>
+                        <tbody>
+                            {filteredData.length === 0 ? (
+                                <tr>
+                                    <td colSpan={info.displayColumns.length + 1} className="px-6 py-8 text-center text-gray-500">
+                                        Nenhum registro encontrado
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredData.map(item => (
+                                    <tr key={item.id || JSON.stringify(item)} className="border-b hover:bg-gray-50 transition">
                                         {info.columns.map((col, idx) => (
-                                            <td key={idx} className="px-6 py-4 text-sm">
-                                                {String(item[col] ?? 'N/A').substring(0, 50)}
+                                            <td key={idx} className="px-6 py-4 text-sm align-top">
+                                                {String(item[col] ?? 'N/A')}
                                             </td>
                                         ))}
-                                        <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => handleEdit(item)}
-                                                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded mr-2 transition text-sm"
-                                            >
-                                                Editar
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(item)}
-                                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition text-sm"
-                                            >
-                                                Deletar
-                                            </button>
+                                        <td className="px-6 py-4 text-right whitespace-nowrap">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => handleEdit(item)}
+                                                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition text-sm font-medium"
+                                                >
+                                                    Editar
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(item)}
+                                                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition text-sm font-medium"
+                                                >
+                                                    Deletar
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
-                                </React.Fragment>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Modal */}

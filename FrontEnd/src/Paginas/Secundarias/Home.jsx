@@ -228,7 +228,7 @@ export default function Home() {
         {/* NOSSOS TORNEIOS */}
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-center py-12 sm:py-16">
           <motion.img
-            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80"
+            src="https://static.vecteezy.com/system/resources/previews/070/254/539/non_2x/collaborative-university-students-engaged-in-group-study-sharing-ideas-and-working-together-on-laptop-atmosphere-is-positive-and-focused-highlighting-teamwork-and-learning-free-photo.jpeg"
             className="w-full lg:w-1/2 rounded-lg shadow-lg"
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}

@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const TableModal = ({ mode, item, tableInfo, onClose, onSubmit }) => {
-    const [formData, setFormData] = useState(
-        item ? { ...item } : {}
-    );
+    const [formData, setFormData] = useState(item ? { ...item } : {});
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -15,6 +13,10 @@ const TableModal = ({ mode, item, tableInfo, onClose, onSubmit }) => {
         }));
         setError('');
     };
+
+    useEffect(() => {
+        setFormData(item ? { ...item } : {});
+    }, [item]);
 
     const validateForm = () => {
         const requiredFields = tableInfo.fields.filter(f => f.required);

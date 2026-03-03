@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logotipo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import TableManager from './TableManager';
@@ -41,16 +42,23 @@ const AdminDashboard = () => {
                 });
     }, [user, token]);
 
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
     return (
-        <div className="flex h-screen bg-gray-100">
-            {/* Sidebar */}
-            <div className="w-64 bg-gray-900 text-white shadow-lg flex flex-col">
-                <div className="p-6 border-b border-gray-700">
+        <div className="flex h-screen bg-gray-100 overflow-hidden">
+            {/* Desktop Sidebar (hidden on small screens) */}
+            <div className="hidden md:flex w-64 bg-gray-900 text-white shadow-lg flex-col h-screen overflow-hidden">
+                <div className="p-6 border-b border-gray-700 flex-shrink-0">
                     <h1 className="text-2xl font-bold">Admin Panel</h1>
                     <p className="text-sm text-gray-400 mt-2">COMAES Platform</p>
                 </div>
 
-                <nav className="mt-8 flex-1 overflow-y-auto">
+                <nav className="flex-1 overflow-y-auto">
                     {menuItems.map(item => (
                         <div
                             key={item.id}
@@ -70,7 +78,7 @@ const AdminDashboard = () => {
                 </nav>
 
                 {/* Sidebar Footer - Dados dinâmicos do usuário */}
-                <div className="border-t border-gray-700 p-6">
+                <div className="border-t border-gray-700 p-6 flex-shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
                             {user?.name?.charAt(0).toUpperCase() || 'A'}
@@ -83,36 +91,89 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col">
-                {/* Header */}
-                <header className="bg-white shadow-sm border-b">
-                    <div className="px-8 py-6 flex justify-between items-center">
-                        <div>
-                            <h2 className="text-2xl font-bold text-gray-900">
-                                {menuItems.find(m => m.id === activeTab)?.label || 'Painel'}
-                            </h2>
-                            <p className="text-sm text-gray-600 mt-1">
-                                Gerencie todos os aspectos da plataforma COMAES
-                            </p>
+            {/* Mobile Sidebar Overlay */}
+            {mobileSidebarOpen && (
+                <div className="fixed inset-0 z-40 md:hidden">
+                    <div className="absolute inset-0 bg-black/50" onClick={() => setMobileSidebarOpen(false)} />
+                    <aside className="absolute left-0 top-0 h-full w-64 bg-gray-900 text-white shadow-lg overflow-hidden flex flex-col">
+                        <div className="p-6 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
+                            <div className="flex items-center gap-3">
+                                <img src={logotipo} alt="Comaes" className="h-8 w-auto object-contain" />
+                                <h1 className="text-lg font-bold">Admin</h1>
+                            </div>
+                            <button onClick={() => setMobileSidebarOpen(false)} className="text-gray-300 px-2">Fechar</button>
                         </div>
-                        <button
-                            onClick={() => { logout(); navigate('/login'); }}
-                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
-                        >
-                            Sair
-                        </button>
+                        <nav className="flex-1 overflow-y-auto px-3 py-4">
+                            {menuItems.map(item => (
+                                <div
+                                    key={item.id}
+                                    onClick={() => { setActiveTab(item.id); setMobileSidebarOpen(false); }}
+                                    className={`px-4 py-3 cursor-pointer rounded-lg mb-1 ${
+                                        activeTab === item.id 
+                                            ? 'bg-blue-600' 
+                                            : 'hover:bg-gray-800'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span>{item.icon}</span>
+                                        <span className="font-medium">{item.label}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </nav>
+                    </aside>
+                </div>
+            )}
+
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col h-screen overflow-hidden">
+                {/* Header - Fixed at top */}
+                <header className="bg-blue-600 shadow-sm border-b flex-shrink-0">
+                    <div className="px-4 py-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <button 
+                                className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg text-white hover:text-blue-200" 
+                                onClick={() => setMobileSidebarOpen(true)}
+                            >
+                                <span className="text-xl">☰</span>
+                            </button>
+                            <img src={logotipo} alt="Comaes" className="h-10 w-auto object-contain" />
+                            <div className="hidden md:block">
+                                <h2 className="text-2xl font-bold text-white">{menuItems.find(m => m.id === activeTab)?.label || 'Painel'}</h2>
+                                <p className="text-sm text-white/80">Gerencie todos os aspectos da plataforma COMAES</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            {/* User info for mobile */}
+                            <div className="md:hidden flex items-center gap-2 text-white">
+                                <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center text-sm font-bold">
+                                    {user?.name?.charAt(0).toUpperCase() || 'A'}
+                                </div>
+                                <span className="text-sm truncate max-w-[100px]">{user?.name?.split(' ')[0] || 'Admin'}</span>
+                            </div>
+                            
+                            {/* Logout button - Always visible */}
+                            <button
+                                onClick={handleLogout}
+                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition font-medium shadow-md whitespace-nowrap"
+                            >
+                                Sair
+                            </button>
+                        </div>
                     </div>
                 </header>
 
-                {/* Content Area */}
-                <div className="flex-1 overflow-auto">
-                    {loadError && (
-                        <div className="mx-8 mt-4 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg">
-                            {loadError}
-                        </div>
-                    )}
-                    <TableManager table={activeTab} />
+                {/* Content Area - Scrollable */}
+                <div className="flex-1 overflow-y-auto">
+                    <div className="max-w-7xl mx-auto w-full px-4 py-6">
+                        {loadError && (
+                            <div className="mb-4 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg">
+                                {loadError}
+                            </div>
+                        )}
+                        <TableManager table={activeTab} />
+                    </div>
                 </div>
             </div>
         </div>
