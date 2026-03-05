@@ -227,7 +227,7 @@ const TableManager = ({ table }) => {
             let type = 'text';
             if (typeof sample === 'number') type = 'number';
             else if (typeof sample === 'string') {
-                // ISO datetime heuristic
+                // ISO datetime heuristic ESM
                 if (/^\d{4}-\d{2}-\d{2}T?/.test(sample)) type = 'datetime-local';
                 else if (sample.length > 200) type = 'textarea';
             }
